@@ -1,0 +1,248 @@
+
+{% extends "base.html" %}
+
+{% block title %}Réserver une consultation | Clinique Santé{% endblock %}
+
+{% block content %}
+<section class="booking-page">
+    <a class="booking-back-link"
+       href="{{ url_for('detail_medecin', medecin_id=medecin['id']) }}">
+        <span aria-hidden="true">←</span>
+        Retour au profil du médecin
+    </a>
+
+    <header class="booking-page-heading">
+        <p class="booking-eyebrow">VOTRE SANTÉ, NOTRE PRIORITÉ</p>
+        <h1>Réserver une <span>consultation.</span></h1>
+        <p>
+            Renseignez vos informations et choisissez un créneau disponible
+            pour organiser votre visite.
+        </p>
+    </header>
+
+    <div class="booking-layout">
+        <div class="booking-form-column">
+            <div class="booking-doctor-summary">
+                <div class="booking-doctor-photo">
+                    <img
+                        src="{{ url_for('static', filename='images/medecins/medecin-' ~ medecin['id'] ~ '.jpg') }}"
+                        alt="Portrait de {{ medecin['nom'] }}"
+                        onerror="this.hidden=true; this.nextElementSibling.hidden=false;"
+                    >
+                    <span hidden aria-hidden="true">
+                        {{ medecin['nom'].replace('Dr ', '')[0] }}
+                    </span>
+                </div>
+
+                <div class="booking-doctor-info">
+                    <span class="booking-summary-label">MÉDECIN SÉLECTIONNÉ</span>
+                    <h2>{{ medecin['nom'] }}</h2>
+                    <p>{{ medecin['specialite'] }}</p>
+                    <span class="booking-doctor-days">
+                        {{ medecin['jours_consultation'] }}
+                    </span>
+                </div>
+
+                <span class="booking-doctor-check" aria-label="Médecin sélectionné">✓</span>
+            </div>
+
+            <form
+                id="form-reservation"
+                class="booking-form reservation-form"
+                method="POST"
+                data-medecin-id="{{ medecin['id'] }}"
+            >
+                {% if erreur %}
+                    <p class="booking-message booking-message-error" role="alert">
+                        {{ erreur }}
+                    </p>
+                {% endif %}
+
+                {% if confirmation %}
+                    <p class="booking-message booking-message-success" role="status">
+                        {{ confirmation }}
+                    </p>
+                {% endif %}
+
+                <div class="booking-form-section">
+                    <div class="booking-section-heading">
+                        <span class="booking-step">01</span>
+                        <div>
+                            <h2>Vos informations</h2>
+                            <p>Pour identifier votre dossier patient.</p>
+                        </div>
+                    </div>
+
+                    <div class="booking-fields">
+                        <div class="booking-field">
+                            <label for="nom">Nom</label>
+                            <input
+                                id="nom"
+                                name="nom"
+                                type="text"
+                                autocomplete="family-name"
+                                value="{{ valeurs.get('nom', '') }}"
+                                placeholder="Votre nom"
+                                required
+                            >
+                        </div>
+
+                        <div class="booking-field">
+                            <label for="prenom">Prénom</label>
+                            <input
+                                id="prenom"
+                                name="prenom"
+                                type="text"
+                                autocomplete="given-name"
+                                value="{{ valeurs.get('prenom', '') }}"
+                                placeholder="Votre prénom"
+                                required
+                            >
+                        </div>
+
+                        <div class="booking-field">
+                            <label for="telephone">Téléphone</label>
+                            <input
+                                id="telephone"
+                                name="telephone"
+                                type="tel"
+                                autocomplete="tel"
+                                value="{{ valeurs.get('telephone', '') }}"
+                                placeholder="Ex. : 6XXXXXXXX"
+                                required
+                            >
+                            <small>Utilisé pour retrouver vos rendez-vous.</small>
+                        </div>
+
+                        <div class="booking-field">
+                            <label for="date_naissance">Date de naissance</label>
+                            <input
+                                id="date_naissance"
+                                name="date_naissance"
+                                type="date"
+                                max="{{ naissance_max }}"
+                                autocomplete="bday"
+                                value="{{ valeurs.get('date_naissance', '') }}"
+                                required
+                            >
+                        </div>
+
+                        <div class="booking-field booking-field-full">
+                            <label for="ville">Ville de résidence</label>
+                            <input
+                                id="ville"
+                                name="ville"
+                                type="text"
+                                autocomplete="address-level2"
+                                value="{{ valeurs.get('ville', '') }}"
+                                placeholder="Ex. : Douala"
+                                required
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <div class="booking-form-section">
+                    <div class="booking-section-heading">
+                        <span class="booking-step">02</span>
+                        <div>
+                            <h2>Votre consultation</h2>
+                            <p>Choisissez une date et un horaire disponible.</p>
+                        </div>
+                    </div>
+
+                    <div class="booking-fields">
+                        <div class="booking-field">
+                            <label for="date">Date souhaitée</label>
+                            <input
+                                id="date"
+                                name="date"
+                                type="date"
+                                min="{{ date_min }}"
+                                value="{{ valeurs.get('date', '') }}"
+                                required
+                            >
+                        </div>
+
+                        <div class="booking-field">
+                            <label for="heure">Créneau disponible</label>
+                            <select id="heure" name="heure" required disabled>
+                                <option value="">Choisissez d'abord une date</option>
+                            </select>
+                            <small id="message-creneaux" role="status">
+                                Les horaires s'afficheront après le choix de la date.
+                            </small>
+                        </div>
+
+                        <div class="booking-field booking-field-full">
+                            <label for="motif">Motif de consultation</label>
+                            <textarea
+                                id="motif"
+                                name="motif"
+                                rows="4"
+                                required
+                                placeholder="Expliquez brièvement la raison de votre consultation."
+                            >{{ valeurs.get('motif', '') }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="booking-form-footer">
+                    <p>
+                        Vérifiez vos informations avant de confirmer votre demande.
+                    </p>
+                    <button class="booking-submit-button" type="submit">
+                        Confirmer la demande
+                        <span aria-hidden="true">→</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <aside class="booking-side-panel">
+            <div class="booking-side-icon" aria-hidden="true">+</div>
+            <p class="booking-eyebrow">COMMENT ÇA MARCHE ?</p>
+            <h2>Votre rendez-vous, en quelques étapes.</h2>
+
+            <div class="booking-side-step">
+                <span>01</span>
+                <div>
+                    <strong>Renseignez vos informations</strong>
+                    <p>Indiquez vos coordonnées pour votre dossier patient.</p>
+                </div>
+            </div>
+
+            <div class="booking-side-step">
+                <span>02</span>
+                <div>
+                    <strong>Choisissez votre créneau</strong>
+                    <p>Les horaires proposés dépendent de la disponibilité du médecin.</p>
+                </div>
+            </div>
+
+            <div class="booking-side-step">
+                <span>03</span>
+                <div>
+                    <strong>Confirmez votre demande</strong>
+                    <p>Vérifiez les informations avant d'envoyer le formulaire.</p>
+                </div>
+            </div>
+
+            <div class="booking-side-note">
+                <span aria-hidden="true">✓</span>
+                <p>Un parcours simple, accessible depuis votre téléphone.</p>
+            </div>
+        </aside>
+    </div>
+</section>
+
+<div class="booking-mobile-bar">
+    <div class="booking-mobile-summary">
+        <span>Votre rendez-vous</span>
+        <strong>{{ medecin['nom'] }}</strong>
+    </div>
+    <button type="submit" form="form-reservation">
+        Confirmer <span aria-hidden="true">→</span>
+    </button>
+</div>
+{% endblock %}

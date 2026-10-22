@@ -1,0 +1,54 @@
+
+{% extends "base.html" %}
+
+{% block title %}Connexion administrateur | Clinique{% endblock %}
+
+{% block content %}
+<section class="admin-auth">
+    <div class="admin-auth-card">
+        <p class="admin-eyebrow">ESPACE PROFESSIONNEL</p>
+        <h1>Connexion administrateur</h1>
+        <p class="admin-description">
+            Connectez-vous pour accéder à la gestion de la clinique.
+        </p>
+
+        {% if erreur %}
+            <div class="admin-error" role="alert">
+                {{ erreur }}
+            </div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('connexion_admin') }}">
+            <div class="admin-field">
+                <label for="identifiant">Identifiant</label>
+                <input
+                    type="text"
+                    id="identifiant"
+                    name="identifiant"
+                    autocomplete="username"
+                    required
+                >
+            </div>
+
+            <div class="admin-field">
+                <label for="mot_de_passe">Mot de passe</label>
+                <input
+                    type="password"
+                    id="mot_de_passe"
+                    name="mot_de_passe"
+                    autocomplete="current-password"
+                    required
+                >
+            </div>
+
+            <button class="admin-submit" type="submit">
+                Se connecter
+            </button>
+        </form>
+
+        <a class="admin-back" href="{{ url_for('accueil') }}">
+            Retour à l'accueil
+        </a>
+    </div>
+</section>
+{% endblock %}

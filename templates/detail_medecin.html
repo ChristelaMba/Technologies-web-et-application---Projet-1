@@ -1,41 +1,121 @@
 
 {% extends "base.html" %}
 
+{% block title %}{{ medecin['nom'] }} | Clinique Santé{% endblock %}
+
 {% block content %}
-<section class="doctor-detail-page">
-    <a class="back-link" href="{{ url_for('medecins') }}">
-        ← Retour à la liste des médecins
+<section class="doctor-profile-page">
+    <a class="profile-back-link" href="{{ url_for('medecins') }}">
+        <span aria-hidden="true">←</span>
+        Tous les médecins
     </a>
 
-    <article class="doctor-detail-card">
-        <div class="doctor-detail-header">
-            <div class="doctor-avatar doctor-avatar-large" aria-hidden="true">
-                {{ medecin['nom'].replace('Dr ', '')[0] }}
+    <div class="doctor-profile-layout">
+        <article class="doctor-profile-card">
+            <div class="profile-photo-wrap">
+                <img
+                    class="profile-doctor-photo"
+                    src="{{ url_for('static', filename='images/medecins/medecin-' ~ medecin['id'] ~ '.jpg') }}"
+                    alt="Portrait du médecin {{ medecin['nom'] }}"
+                    onerror="this.hidden=true; this.nextElementSibling.hidden=false;"
+                >
+                <div class="profile-photo-fallback" hidden aria-hidden="true">
+                    {{ medecin['nom'].replace('Dr ', '')[0] }}
+                </div>
+
+                <span class="profile-photo-label">
+                    <span class="doctor-badge-dot"></span>
+                    Équipe médicale
+                </span>
             </div>
 
-            <div>
-                <p class="section-label">NOTRE ÉQUIPE MÉDICALE</p>
+            <div class="profile-main-info">
+                <p class="profile-eyebrow">VOTRE SANTÉ, NOTRE PRIORITÉ</p>
+
                 <h1>{{ medecin['nom'] }}</h1>
-                <p class="doctor-specialty">{{ medecin['specialite'] }}</p>
+
+                <span class="profile-specialty">
+                    {{ medecin['specialite'] }}
+                </span>
+
+                <p class="profile-description">
+                    Retrouvez les informations de consultation de ce médecin
+                    et choisissez un créneau adapté à votre disponibilité.
+                </p>
+
+                <div class="profile-trust-note">
+                    <span aria-hidden="true">✓</span>
+                    <p>Réservation simple et accessible en ligne.</p>
+                </div>
             </div>
-        </div>
+        </article>
 
-        <div class="doctor-detail-section">
-            <h2>Jours de consultation</h2>
-            <p>{{ medecin['jours_consultation'] }}</p>
-        </div>
+        <aside class="profile-booking-card">
+            <div class="booking-card-heading">
+                <span class="booking-calendar-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                        <rect x="3" y="5" width="18" height="16" rx="2"/>
+                        <path d="M16 3v4M8 3v4M3 10h18"/>
+                    </svg>
+                </span>
 
-        <div class="doctor-detail-section">
-            <h2>Prendre rendez-vous</h2>
-            <p>
-                Vous pourrez sélectionner une date et un créneau disponible
-                pour demander une consultation auprès de ce médecin.
+                <div>
+                    <p class="profile-eyebrow">ORGANISEZ VOTRE VISITE</p>
+                    <h2>Consultations</h2>
+                </div>
+            </div>
+
+            <div class="profile-schedule">
+                <span class="schedule-label">Jours de consultation</span>
+
+                <div class="schedule-value">
+                    <span class="schedule-check" aria-hidden="true">✓</span>
+                    <p>{{ medecin['jours_consultation'] }}</p>
+                </div>
+            </div>
+
+            <div class="booking-card-divider"></div>
+
+            <div class="booking-benefit">
+                <span class="benefit-icon" aria-hidden="true">01</span>
+                <div>
+                    <strong>Choisissez une date</strong>
+                    <p>Consultez les disponibilités proposées.</p>
+                </div>
+            </div>
+
+            <div class="booking-benefit">
+                <span class="benefit-icon" aria-hidden="true">02</span>
+                <div>
+                    <strong>Sélectionnez un créneau</strong>
+                    <p>Demandez votre rendez-vous en ligne.</p>
+                </div>
+            </div>
+
+            <a
+                class="profile-booking-button"
+                href="{{ url_for('reservation', medecin_id=medecin['id']) }}"
+            >
+                Prendre rendez-vous
+                <span aria-hidden="true">→</span>
+            </a>
+
+            <p class="booking-card-note">
+                Vous pourrez choisir la date et l'heure à l'étape suivante.
             </p>
-
-            <button class="appointment-button" type="button" disabled>
-                Prise de rendez-vous bientôt disponible
-            </button>
-        </div>
-    </article>
+        </aside>
+    </div>
 </section>
+
+<div class="mobile-booking-bar">
+    <div>
+        <span>Votre consultation</span>
+        <strong>{{ medecin['specialite'] }}</strong>
+    </div>
+
+    <a href="{{ url_for('reservation', medecin_id=medecin['id']) }}">
+        Réserver
+        <span aria-hidden="true">→</span>
+    </a>
+</div>
 {% endblock %}

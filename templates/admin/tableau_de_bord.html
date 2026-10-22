@@ -1,0 +1,34 @@
+
+{% extends "base.html" %}
+
+{% block title %}Administration | Clinique{% endblock %}
+
+{% block content %}
+<section class="admin-dashboard">
+    <div class="admin-dashboard-header">
+        <div>
+            <p class="admin-eyebrow">ESPACE PROFESSIONNEL</p>
+            <h1>Tableau de bord</h1>
+            <p>
+                Bienvenue, {{ identifiant }}.
+                Vous êtes connecté à l'espace d'administration.
+            </p>
+        </div>
+
+        <form method="POST" action="{{ url_for('deconnexion_admin') }}">
+            <button class="admin-logout" type="submit">
+                Se déconnecter
+            </button>
+        </form>
+    </div>
+
+    <div class="admin-welcome-card">
+        <h2>Gestion de la clinique</h2>
+        <p>
+            L'accès administrateur fonctionne.
+            Les fonctions de gestion des rendez-vous, des médecins
+            et des patients seront ajoutées dans les prochaines étapes.
+        </p>
+    </div>
+</section>
+{% endblock %}

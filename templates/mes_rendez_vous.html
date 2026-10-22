@@ -1,6 +1,137 @@
+
 {% extends "base.html" %}
 
+{% block title %}Mes rendez-vous | Clinique Santé{% endblock %}
+
 {% block content %}
-    <h1>Mes rendez-vous</h1>
-    <p>Consultez vos rendez-vous auprès de notre clinique.</p>
+<section class="patient-appointments-page">
+    <header class="patient-appointments-heading">
+        <p class="booking-eyebrow">ESPACE PATIENT</p>
+        <h1>Vos rendez-vous, <span>en un seul endroit.</span></h1>
+        <p>
+            Retrouvez vos consultations à l'aide du numéro de téléphone
+            utilisé lors de votre réservation.
+        </p>
+    </header>
+
+    <div class="patient-search-card">
+        <div class="patient-search-icon" aria-hidden="true">⌕</div>
+
+        <div class="patient-search-heading">
+            <h2>Retrouver mes consultations</h2>
+            <p>Saisissez votre numéro de téléphone pour consulter vos rendez-vous.</p>
+        </div>
+
+        <form
+            class="patient-search-form"
+            method="POST"
+            action="{{ url_for('mes_rendez_vous') }}"
+        >
+            <div class="patient-search-field">
+                <label for="telephone">Numéro de téléphone</label>
+                <input
+                    id="telephone"
+                    name="telephone"
+                    type="tel"
+                    autocomplete="tel"
+                    placeholder="Ex. : 6XXXXXXXX"
+                    value="{{ telephone }}"
+                    required
+                >
+            </div>
+
+            <button class="patient-search-button" type="submit">
+                Rechercher
+                <span aria-hidden="true">→</span>
+            </button>
+        </form>
+
+        {% if erreur %}
+            <p class="booking-message booking-message-error" role="alert">
+                {{ erreur }}
+            </p>
+        {% endif %}
+    </div>
+
+    {% if recherche_effectuee %}
+        <section class="patient-results">
+            <div class="patient-results-heading">
+                <div>
+                    <p class="booking-eyebrow">VOTRE SUIVI</p>
+                    <h2>Mes consultations</h2>
+                </div>
+
+                {% if rendez_vous %}
+                    <span class="patient-results-count">
+                        {{ rendez_vous|length }}
+                        {% if rendez_vous|length > 1 %}rendez-vous{% else %}rendez-vous{% endif %}
+                    </span>
+                {% endif %}
+            </div>
+
+            {% if rendez_vous %}
+                <div class="patient-appointments-list">
+                    {% for rdv in rendez_vous %}
+                        <article class="patient-appointment-card">
+                            <div class="patient-appointment-main">
+                                <div class="patient-appointment-icon" aria-hidden="true">
+                                    +
+                                </div>
+
+                                <div class="patient-appointment-doctor">
+                                    <p class="patient-card-eyebrow">CONSULTATION MÉDICALE</p>
+                                    <h3>{{ rdv['nom_medecin'] }}</h3>
+                                    <p>{{ rdv['specialite'] }}</p>
+                                </div>
+
+                                {% set statut = rdv['statut']|lower %}
+                                <span class="patient-status
+                                    {% if statut == 'effectué' or statut == 'effectue' %}
+                                        patient-status-done
+                                    {% elif statut == 'annulé' or statut == 'annule' %}
+                                        patient-status-cancelled
+                                    {% else %}
+                                        patient-status-planned
+                                    {% endif %}
+                                ">
+                                    {{ rdv['statut'] }}
+                                </span>
+                            </div>
+
+                            <div class="patient-appointment-details">
+                                <div class="patient-detail-item">
+                                    <span class="patient-detail-label">DATE</span>
+                                    <strong>{{ rdv['date'] }}</strong>
+                                </div>
+
+                                <div class="patient-detail-item">
+                                    <span class="patient-detail-label">HEURE</span>
+                                    <strong>{{ rdv['heure'] }}</strong>
+                                </div>
+
+                                <div class="patient-detail-item patient-detail-motif">
+                                    <span class="patient-detail-label">MOTIF</span>
+                                    <p>{{ rdv['motif'] or 'Non renseigné' }}</p>
+                                </div>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="patient-empty-state">
+                    <div class="patient-empty-icon" aria-hidden="true">⌕</div>
+                    <h3>Aucun rendez-vous trouvé</h3>
+                    <p>
+                        Aucun rendez-vous n'est associé à ce numéro pour le moment.
+                        Vérifiez le numéro saisi ou prenez un nouveau rendez-vous.
+                    </p>
+                    <a class="patient-empty-button" href="{{ url_for('medecins') }}">
+                        Découvrir les médecins
+                        <span aria-hidden="true">→</span>
+                    </a>
+                </div>
+            {% endif %}
+        </section>
+    {% endif %}
+</section>
 {% endblock %}
