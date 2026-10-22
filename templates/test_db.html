@@ -1,0 +1,24 @@
+
+{% extends "base.html" %}
+
+{% block title %}Test de la base de données{% endblock %}
+
+{% block content %}
+<section class="services-section">
+    <div class="container">
+        <div class="section-heading">
+            <span class="eyebrow">Vérification technique</span>
+            <h1>Connexion à SQLite réussie</h1>
+            <p>Tables présentes dans la base de données.</p>
+        </div>
+
+        <ul>
+            {% for table in tables %}
+                <li>{{ table["name"] }}</li>
+            {% else %}
+                <li>Aucune table trouvée.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</section>
+{% endblock %}

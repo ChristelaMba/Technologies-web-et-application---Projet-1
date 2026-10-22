@@ -1,0 +1,56 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Prenez rendez-vous avec un médecin en toute simplicité.">
+    <title>{% block title %}Clinique Santé{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header class="site-header">
+        <nav class="navbar container" aria-label="Navigation principale">
+            <a class="brand" href="{{ url_for('accueil') }}">
+                <span class="brand-mark">+</span>
+                <span>Clinique<span class="brand-accent">Santé</span></span>
+            </a>
+
+            <button class="menu-toggle" id="menu-toggle"
+                    type="button" aria-label="Ouvrir le menu"
+                    aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <div class="nav-links" id="nav-links">
+                <a href="{{ url_for('accueil') }}">Accueil</a>
+                <a href="{{ url_for('medecins') }}">Nos médecins</a>
+                <a href="{{ url_for('mes_rendez_vous') }}">Mes rendez-vous</a>
+                <a class="nav-button" href="{{ url_for('medecins') }}">Prendre rendez-vous</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-content">
+            <a class="brand footer-brand" href="{{ url_for('accueil') }}">
+                <span class="brand-mark">+</span>
+                <span>Clinique<span class="brand-accent">Santé</span></span>
+            </a>
+            <p>Votre santé, notre priorité.</p>
+            <p class="footer-location">Douala, Cameroun</p>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Clinique Santé. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+</body>
+</html>

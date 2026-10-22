@@ -1,0 +1,41 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<section class="doctor-detail-page">
+    <a class="back-link" href="{{ url_for('medecins') }}">
+        ← Retour à la liste des médecins
+    </a>
+
+    <article class="doctor-detail-card">
+        <div class="doctor-detail-header">
+            <div class="doctor-avatar doctor-avatar-large" aria-hidden="true">
+                {{ medecin['nom'].replace('Dr ', '')[0] }}
+            </div>
+
+            <div>
+                <p class="section-label">NOTRE ÉQUIPE MÉDICALE</p>
+                <h1>{{ medecin['nom'] }}</h1>
+                <p class="doctor-specialty">{{ medecin['specialite'] }}</p>
+            </div>
+        </div>
+
+        <div class="doctor-detail-section">
+            <h2>Jours de consultation</h2>
+            <p>{{ medecin['jours_consultation'] }}</p>
+        </div>
+
+        <div class="doctor-detail-section">
+            <h2>Prendre rendez-vous</h2>
+            <p>
+                Vous pourrez sélectionner une date et un créneau disponible
+                pour demander une consultation auprès de ce médecin.
+            </p>
+
+            <button class="appointment-button" type="button" disabled>
+                Prise de rendez-vous bientôt disponible
+            </button>
+        </div>
+    </article>
+</section>
+{% endblock %}

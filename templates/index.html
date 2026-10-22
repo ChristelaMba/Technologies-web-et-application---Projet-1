@@ -1,0 +1,122 @@
+
+{% extends "base.html" %}
+
+{% block title %}Accueil | Clinique Santé{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="container hero-grid">
+        <div class="hero-content">
+            <span class="eyebrow">
+                <span class="status-dot"></span>
+                Votre santé au cœur de nos priorités
+            </span>
+
+            <h1>Prendre soin de vous, <span>en toute simplicité.</span></h1>
+
+            <p class="hero-description">
+                Trouvez un médecin et choisissez votre créneau de consultation
+                en quelques étapes, sans vous déplacer pour réserver.
+            </p>
+
+            <div class="hero-actions">
+                <a class="button button-primary" href="{{ url_for('medecins') }}">
+                    Prendre rendez-vous
+                    <span aria-hidden="true">→</span>
+                </a>
+                <a class="button button-secondary" href="#services">
+                    Découvrir nos services
+                </a>
+            </div>
+
+            <div class="hero-note">
+                <span class="note-icon">✓</span>
+                <p>Une réservation simple, accessible depuis votre téléphone.</p>
+            </div>
+        </div>
+
+        <div class="hero-visual" aria-label="Présentation de la clinique">
+            <div class="visual-orb orb-one"></div>
+            <div class="visual-orb orb-two"></div>
+
+            <div class="medical-card">
+                <div class="medical-symbol">+</div>
+                <p class="medical-card-label">CLINIQUE SANTÉ</p>
+                <h2>Des soins plus accessibles.</h2>
+                <p>Organisez vos consultations à votre rythme.</p>
+
+                <div class="medical-divider"></div>
+
+                <div class="medical-feature">
+                    <span class="feature-icon">01</span>
+                    <div>
+                        <strong>Choisissez votre médecin</strong>
+                        <p>Selon votre besoin de consultation</p>
+                    </div>
+                </div>
+
+                <div class="medical-feature">
+                    <span class="feature-icon">02</span>
+                    <div>
+                        <strong>Sélectionnez un créneau</strong>
+                        <p>Selon les disponibilités proposées</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="floating-label">
+                <span class="floating-check">✓</span>
+                <div>
+                    <strong>Simple et pratique</strong>
+                    <p>En ligne, à tout moment</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="services-section" id="services">
+    <div class="container">
+        <div class="section-heading">
+            <span class="eyebrow">Une expérience simplifiée</span>
+            <h2>Votre parcours de santé, plus facile.</h2>
+            <p>Les fonctionnalités essentielles pour organiser vos consultations.</p>
+        </div>
+
+        <div class="services-grid">
+            <article class="service-card">
+                <span class="service-number">01</span>
+                <div class="service-icon">✚</div>
+                <h3>Trouvez un médecin</h3>
+                <p>Parcourez les médecins disponibles et filtrez-les par spécialité.</p>
+            </article>
+
+            <article class="service-card">
+                <span class="service-number">02</span>
+                <div class="service-icon">▦</div>
+                <h3>Réservez votre créneau</h3>
+                <p>Choisissez une date et une heure parmi les créneaux disponibles.</p>
+            </article>
+
+            <article class="service-card">
+                <span class="service-number">03</span>
+                <div class="service-icon">✓</div>
+                <h3>Retrouvez vos rendez-vous</h3>
+                <p>Consultez vos réservations à l’aide de votre numéro de téléphone.</p>
+            </article>
+        </div>
+    </div>
+</section>
+
+<section class="appointment-banner">
+    <div class="container banner-content">
+        <div>
+            <span class="eyebrow">Votre prochaine consultation</span>
+            <h2>Faites le premier pas vers une meilleure organisation de vos soins.</h2>
+        </div>
+        <a class="button button-light" href="{{ url_for('medecins') }}">
+            Voir les médecins <span aria-hidden="true">→</span>
+        </a>
+    </div>
+</section>
+{% endblock %}
