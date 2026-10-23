@@ -63,7 +63,7 @@
     {% if medecins %}
         <div class="doctors-results-heading">
             <h2>Les médecins de la clinique</h2>
-            <span>{{ medecins|length }} profils</span>
+            <span id="nombre-profils">{{ medecins|length }} profils</span>
         </div>
 
         <div
@@ -71,9 +71,18 @@
             id="liste-medecins"
         >
             {% for medecin in medecins %}
-                {% set chemin_photo = medecin['photo'] %}
+                {% set nom_photo = medecin['photo'] %}
 
-                {% if not chemin_photo and medecin['id'] <= 8 %}
+                {% if nom_photo %}
+                    {% if nom_photo.startswith('/static/') %}
+                        {% set chemin_photo = nom_photo %}
+                    {% else %}
+                        {% set chemin_photo = url_for(
+                            'static',
+                            filename='images/medecins/' ~ nom_photo
+                        ) %}
+                    {% endif %}    
+                {% else %}
                     {% set chemin_photo = url_for(
                         'static',
                         filename='images/medecins/medecin-' ~ medecin['id'] ~ '.jpg'
@@ -85,19 +94,17 @@
                     data-specialite="{{ medecin['specialite'] }}"
                 >
                     <div class="doctor-photo-wrap">
-                        {% if chemin_photo %}
-                            <img
-                                class="doctor-photo"
-                                src="{{ chemin_photo }}"
-                                alt="Portrait du médecin {{ medecin['nom'] }}"
-                                loading="lazy"
-                                onerror="this.hidden=true; this.nextElementSibling.hidden=false;"
-                            >
-                        {% endif %}
+                        <img
+                            class="doctor-photo"
+                            src="{{ chemin_photo if chemin_photo else url_for('static', filename='images/medecin-noire.jpg') }}"
+                            alt="Portrait du médecin {{ medecin['nom'] }}"
+                            loading="lazy"
+                            onerror="this.onerror=null; this.hidden=true; this.parentElement.querySelector('.doctor-photo-fallback').hidden=false;"
+                        >
 
                         <div
                             class="doctor-photo-fallback"
-                            {% if chemin_photo %}hidden{% endif %}
+                            hidden
                             aria-hidden="true"
                         >
                             {{ medecin['nom'].replace('Dr ', '')[0] }}

@@ -1,0 +1,186 @@
+
+{% extends "base.html" %}
+
+{% block title %}Statistiques de la clinique{% endblock %}
+
+{% block content %}
+<div class="stats-page">
+    <div class="stats-header">
+        <div>
+            <h1>Statistiques de la clinique</h1>
+            <p>Suivez l'activité et les rendez-vous de la clinique.</p>
+        </div>
+        <a href="{{ url_for('tableau_de_bord') }}" class="stats-back">
+            Retour au tableau de bord
+        </a>
+    </div>
+
+    {% set total_rendez_vous = namespace(valeur=0) %}
+    {% set total_annules = namespace(valeur=0) %}
+
+    {% for ligne in statistiques.rendez_vous_par_specialite %}
+        {% set total_rendez_vous.valeur = total_rendez_vous.valeur + ligne.total %}
+    {% endfor %}
+
+    {% for medecin in statistiques.taux_annulation_par_medecin %}
+        {% set total_annules.valeur = total_annules.valeur + medecin.rendez_vous_annules %}
+    {% endfor %}
+
+    {% if total_rendez_vous.valeur > 0 %}
+        {% set taux_global = (total_annules.valeur * 100 / total_rendez_vous.valeur)|round(1) %}
+    {% else %}
+        {% set taux_global = 0 %}
+    {% endif %}
+
+    <div class="stats-cards">
+        <article class="stats-card">
+            <p>Total des rendez-vous enregistrés</p>
+            <strong>{{ total_rendez_vous.valeur }}</strong>
+        </article>
+
+        <article class="stats-card">
+            <p>Rendez-vous annulés</p>
+            <strong>{{ total_annules.valeur }}</strong>
+        </article>
+
+        <article class="stats-card">
+            <p>Taux global d'annulation</p>
+            <strong>{{ taux_global }} %</strong>
+        </article>
+    </div>
+
+    <section class="stats-section">
+        <h2>Rendez-vous par spécialité</h2>
+        <p class="stats-description">
+            Répartition des rendez-vous enregistrés selon la spécialité.
+        </p>
+
+        {% set maximum = namespace(valeur=1) %}
+        {% for ligne in statistiques.rendez_vous_par_specialite %}
+            {% if ligne.total > maximum.valeur %}
+                {% set maximum.valeur = ligne.total %}
+            {% endif %}
+        {% endfor %}
+
+        {% for ligne in statistiques.rendez_vous_par_specialite %}
+            {% set pourcentage = ((ligne.total * 100 / maximum.valeur)|round(0)|int) %}
+
+            <div class="stats-bar-row">
+                <span>{{ ligne.specialite }}</span>
+
+                <div class="stats-bar-track">
+                    <div class="stats-bar-fill"
+                         style="width: {{ pourcentage }}%">
+                    </div>
+                </div>
+
+                <strong>{{ ligne.total }}</strong>
+            </div>
+        {% else %}
+            <p>Aucun rendez-vous enregistré pour le moment.</p>
+        {% endfor %}
+    </section>
+
+    <section class="stats-section">
+        <h2>Taux d'annulation par médecin</h2>
+        <p class="stats-description">
+            Comparaison du nombre de rendez-vous et des annulations.
+        </p>
+
+        <div class="stats-table-wrapper">
+            <table class="stats-table">
+                <thead>
+                    <tr>
+                        <th>Médecin</th>
+                        <th>Spécialité</th>
+                        <th>Total</th>
+                        <th>Annulés</th>
+                        <th>Taux</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for medecin in statistiques.taux_annulation_par_medecin %}
+                    <tr>
+                        <td>{{ medecin.medecin }}</td>
+                        <td>{{ medecin.specialite }}</td>
+                        <td>{{ medecin.total_rendez_vous }}</td>
+                        <td>{{ medecin.rendez_vous_annules }}</td>
+                        <td>{{ medecin.taux_annulation }} %</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5">Aucun médecin trouvé.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="stats-section">
+        <h2>Les cinq jours les plus chargés par mois</h2>
+        <p class="stats-description">
+            Classement des journées ayant le plus de rendez-vous.
+        </p>
+
+        <div class="stats-table-wrapper">
+            <table class="stats-table">
+                <thead>
+                    <tr>
+                        <th>Mois</th>
+                        <th>Date</th>
+                        <th>Rendez-vous</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mois, jours in statistiques.cinq_jours_plus_charges_par_mois.items() %}
+                        {% for jour in jours %}
+                        <tr>
+                            <td>{{ mois }}</td>
+                            <td>{{ jour.date }}</td>
+                            <td>{{ jour.total_rendez_vous }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="3">Aucune donnée disponible.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="stats-section">
+        <h2>Activité hebdomadaire</h2>
+        <p class="stats-description">
+            Nombre de nouveaux patients enregistrés chaque semaine.
+        </p>
+
+        <div class="stats-table-wrapper">
+            <table class="stats-table">
+                <thead>
+                    <tr>
+                        <th>Semaine</th>
+                        <th>Nouveaux patients</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ligne in statistiques.nouveaux_patients_par_semaine %}
+                    <tr>
+                        <td>{{ ligne.semaine }}</td>
+                        <td>{{ ligne.total }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="2">Aucune donnée disponible.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        
+    </section>
+</div>
+{% endblock %}

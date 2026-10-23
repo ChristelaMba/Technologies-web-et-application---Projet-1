@@ -4933,3 +4933,204 @@ button,
         flex-direction: column;
     }
 }
+
+
+
+/* Page des statistiques */
+.stats-page {
+    width: min(1200px, calc(100% - 40px));
+    margin: 42px auto 70px;
+    color: #173b5c;
+}
+
+.stats-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 30px;
+}
+
+.stats-header h1 {
+    margin: 0 0 10px;
+    font-size: 30px;
+    color: #173b5c;
+}
+
+.stats-header p,
+.stats-description {
+    color: #687e93;
+    line-height: 1.6;
+}
+
+.stats-back {
+    display: inline-block;
+    padding: 13px 18px;
+    border-radius: 10px;
+    background: #e9f0ff;
+    color: #2459ad;
+    text-decoration: none;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.stats-back:hover {
+    background: #dce8ff;
+}
+
+.stats-cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    margin-bottom: 28px;
+}
+
+.stats-card,
+.stats-section {
+    background: #fff;
+    border: 1px solid #dfe8f2;
+    border-radius: 16px;
+    box-shadow: 0 5px 18px rgba(23, 59, 92, 0.04);
+}
+
+.stats-card {
+    padding: 26px;
+}
+
+.stats-card p {
+    margin: 0 0 22px;
+    color: #687e93;
+}
+
+.stats-card strong {
+    color: #2459ad;
+    font-size: 34px;
+}
+
+.stats-section {
+    padding: 26px;
+    margin-bottom: 26px;
+}
+
+.stats-section h2 {
+    margin: 0;
+    font-size: 21px;
+    color: #173b5c;
+}
+
+.stats-description {
+    margin: 10px 0 24px;
+    font-size: 14px;
+}
+
+.stats-bar-row {
+    display: grid;
+    grid-template-columns: minmax(150px, 210px) minmax(80px, 1fr) 30px;
+    align-items: center;
+    gap: 16px;
+    margin: 20px 0;
+}
+
+.stats-bar-track {
+    height: 12px;
+    overflow: hidden;
+    border-radius: 20px;
+    background: #edf2f7;
+}
+
+.stats-bar-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: #3986bb;
+    transition: width 0.3s ease;
+}
+
+.stats-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.stats-table th,
+.stats-table td {
+    padding: 15px 14px;
+    border-bottom: 1px solid #e7edf4;
+}
+
+.stats-table th {
+    background: #f4f7fb;
+    color: #49647f;
+    font-weight: 600;
+}
+
+.stats-table tbody tr:hover {
+    background: #f8fbff;
+}
+
+.stats-note {
+    margin-top: 22px;
+    padding: 15px 18px;
+    border-radius: 10px;
+    background: #fff6e5;
+    color: #895b13;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+@media (max-width: 760px) {
+    .stats-page {
+        width: calc(100% - 28px);
+        margin-top: 28px;
+    }
+
+    .stats-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .stats-header h1 {
+        font-size: 25px;
+    }
+
+    .stats-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-section {
+        padding: 18px;
+    }
+
+    .stats-bar-row {
+        grid-template-columns: 1fr 35px;
+        gap: 8px 12px;
+    }
+
+    .stats-bar-row > span {
+        grid-column: 1 / -1;
+    }
+}
+
+
+
+.admin-doctor-delete {
+    border: 1px solid #e3a3a3;
+    background-color: #fff5f5;
+    color: #a52b2b;
+    cursor: pointer;
+    font: inherit;
+}
+
+.admin-doctor-delete:hover {
+    background-color: #a52b2b;
+    border-color: #a52b2b;
+    color: #ffffff;
+}
+
+.admin-doctor-actions form {
+    margin: 0;
+}

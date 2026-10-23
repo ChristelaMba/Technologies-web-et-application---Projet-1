@@ -113,6 +113,20 @@
                         >
                             Modifier
                         </a>
+
+                        <form
+                            method="POST"
+                            action="{{ url_for('supprimer_medecin', medecin_id=medecin.id) }}"
+                            onsubmit="return confirm('Voulez-vous vraiment supprimer ce médecin ? Cette action est définitive.');"
+                        >
+                            <button
+                                type="submit"
+                                class="admin-action-button admin-doctor-delete"
+                            >
+                                Supprimer
+                            </button>
+                        </form>
+
                     </div>
                     
                 </article>

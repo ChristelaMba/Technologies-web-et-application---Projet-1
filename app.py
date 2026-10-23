@@ -15,6 +15,7 @@ from flask import (
     request,
     session,
     url_for,
+    flash,
 )
 
 from werkzeug.security import check_password_hash
@@ -343,9 +344,10 @@ def reservation(medecin_id):
                             prenom,
                             telephone,
                             date_naissance,
-                            ville
+                            ville,
+                            date_creation
                         )
-                        VALUES (?, ?, ?, ?, ?)
+                        VALUES (?, ?, ?, ?, ?, datetime('now', 'localtime'))
                         """,
                         (
                             nom,
@@ -474,6 +476,114 @@ def api_creneaux():
         ),
         "message": "Créneaux disponibles chargés.",
     })
+
+
+
+@app.route("/api/statistiques")
+def api_statistiques():
+    connexion = get_db()
+
+    # Nombre de rendez-vous par spécialité
+    par_specialite = connexion.execute(
+        """
+        SELECT medecins.specialite, COUNT(rendez_vous.id) AS total
+        FROM rendez_vous
+        JOIN medecins ON rendez_vous.medecin_id = medecins.id
+        GROUP BY medecins.specialite
+        ORDER BY total DESC
+        """
+    ).fetchall()
+
+    # Taux d'annulation pour chaque médecin
+    par_medecin = connexion.execute(
+        """
+        SELECT
+            medecins.id,
+            medecins.nom,
+            medecins.specialite,
+            COUNT(rendez_vous.id) AS total,
+            SUM(CASE WHEN rendez_vous.statut = 'annulé'
+                THEN 1 ELSE 0 END) AS annules
+        FROM medecins
+        LEFT JOIN rendez_vous ON rendez_vous.medecin_id = medecins.id
+        GROUP BY medecins.id, medecins.nom, medecins.specialite
+        ORDER BY medecins.nom
+        """
+    ).fetchall()
+
+    taux_annulation = []
+    for medecin in par_medecin:
+        total = medecin["total"]
+        annules = medecin["annules"] or 0
+
+        taux_annulation.append({
+            "medecin": medecin["nom"],
+            "specialite": medecin["specialite"],
+            "total_rendez_vous": total,
+            "rendez_vous_annules": annules,
+            "taux_annulation": round(annules * 100 / total, 2)
+            if total else 0
+        })
+
+    # Les cinq jours les plus chargés de chaque mois
+    jours_charges = connexion.execute(
+        """
+        SELECT
+            strftime('%Y-%m', date) AS mois,
+            date,
+            COUNT(*) AS total
+        FROM rendez_vous
+        GROUP BY mois, date
+        ORDER BY mois DESC, total DESC, date ASC
+        """
+    ).fetchall()
+
+    top_jours = {}
+    for jour in jours_charges:
+        mois = jour["mois"]
+        if mois not in top_jours:
+            top_jours[mois] = []
+
+        if len(top_jours[mois]) < 5:
+            top_jours[mois].append({
+                "date": jour["date"],
+                "total_rendez_vous": jour["total"]
+            })
+
+    # Nouveaux patients par semaine
+    nouveaux_patients = connexion.execute(
+        """
+        SELECT
+            strftime('%Y-%W', date_creation) AS semaine,
+            COUNT(*) AS total
+        FROM patients
+        WHERE date_creation IS NOT NULL
+        GROUP BY semaine
+        ORDER BY semaine DESC
+        """
+    ).fetchall()
+
+    connexion.close()
+
+    return {
+        "rendez_vous_par_specialite": [
+            {
+                "specialite": ligne["specialite"],
+                "total": ligne["total"]
+            }
+            for ligne in par_specialite
+        ],
+        "taux_annulation_par_medecin": taux_annulation,
+        "cinq_jours_plus_charges_par_mois": top_jours,
+        "nouveaux_patients_par_semaine": [
+            {
+                "semaine": ligne["semaine"],
+                "total": ligne["total"]
+            }
+            for ligne in nouveaux_patients
+        ]
+    }
+
 
 
 @app.route("/mes-rendez-vous", methods=["GET", "POST"])
@@ -756,6 +866,60 @@ def modifier_medecin(medecin_id):
         erreur=erreur,
     )
 
+
+
+
+@app.route("/admin/medecins/<int:medecin_id>/supprimer", methods=["POST"])
+@administrateur_requis
+def supprimer_medecin(medecin_id):
+    connexion = get_db()
+
+    medecin = connexion.execute(
+        "SELECT id, nom FROM medecins WHERE id = ?",
+        (medecin_id,),
+    ).fetchone()
+
+    if medecin is None:
+        connexion.close()
+        flash("Ce médecin n'existe pas.", "error")
+        return redirect(url_for("gestion_medecins"))
+
+    rendez_vous = connexion.execute(
+        "SELECT COUNT(*) AS total FROM rendez_vous WHERE medecin_id = ?",
+        (medecin_id,),
+    ).fetchone()
+
+    if rendez_vous["total"] > 0:
+        connexion.close()
+        flash(
+            "Impossible de supprimer ce médecin : des rendez-vous "
+            "sont associés à son dossier.",
+            "error",
+        )
+        return redirect(url_for("gestion_medecins"))
+
+    connexion.execute(
+        "DELETE FROM medecins WHERE id = ?",
+        (medecin_id,),
+    )
+    connexion.commit()
+    connexion.close()
+
+    flash(
+        f"Le médecin {medecin['nom']} a été supprimé.",
+        "success",
+    )
+    return redirect(url_for("gestion_medecins"))
+
+
+
+
+@app.route("/admin/statistiques")
+@administrateur_requis
+def page_statistiques():
+    statistiques = api_statistiques()
+
+    return render_template("admin/statistiques.html", statistiques=statistiques)
 
 
 @app.route("/test-db")
