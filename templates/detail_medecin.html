@@ -12,13 +12,32 @@
 
     <div class="doctor-profile-layout">
         <article class="doctor-profile-card">
+            {% set nom_photo = medecin['photo'] %}
+
+            {% if nom_photo %}
+                {% if nom_photo.startswith('/static/') %}
+                    {% set chemin_photo = nom_photo %}
+                {% else %}
+                    {% set chemin_photo = url_for(
+                        'static',
+                        filename='images/medecins/' ~ nom_photo
+                    ) %}
+                {% endif %}
+            {% else %}
+                {% set chemin_photo = url_for(
+                    'static',
+                    filename='images/medecins/medecin-' ~ medecin['id'] ~ '.jpg'
+                ) %}
+            {% endif %}
+
             <div class="profile-photo-wrap">
                 <img
                     class="profile-doctor-photo"
-                    src="{{ url_for('static', filename='images/medecins/medecin-' ~ medecin['id'] ~ '.jpg') }}"
+                    src="{{ chemin_photo }}"
                     alt="Portrait du médecin {{ medecin['nom'] }}"
-                    onerror="this.hidden=true; this.nextElementSibling.hidden=false;"
+                    onerror="this.onerror=null; this.hidden=true; this.nextElementSibling.hidden=false;"
                 >
+
                 <div class="profile-photo-fallback" hidden aria-hidden="true">
                     {{ medecin['nom'].replace('Dr ', '')[0] }}
                 </div>

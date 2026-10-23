@@ -98,6 +98,17 @@ def jour_consultation(medecin, date_consultation):
     return jour.lower() in jours
 
 
+def date_iso_valide(valeur):
+    # Refuse les formats que fromisoformat accepte en plus de AAAA-MM-JJ.
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", valeur or ""):
+        return None
+
+    try:
+        return date.fromisoformat(valeur)
+    except ValueError:
+        return None
+
+
 def telephone_valide(telephone):
     telephone = telephone.strip().replace(" ", "")
     telephone = telephone.replace("-", "").replace(".", "")
@@ -278,10 +289,10 @@ def reservation(medecin_id):
         telephone = telephone_valide(
             request.form.get("telephone", "")
         )
-        date_naissance = request.form.get("date_naissance", "")
+        date_naissance = request.form.get("date_naissance", "").strip()
         ville = request.form.get("ville", "").strip()
-        date_rendez_vous = request.form.get("date", "")
-        heure = request.form.get("heure", "")
+        date_rendez_vous = request.form.get("date", "").strip()
+        heure = request.form.get("heure", "").strip()
         motif = request.form.get("motif", "").strip()
 
         if not all([
@@ -300,10 +311,10 @@ def reservation(medecin_id):
             )
 
         else:
-            try:
-                naissance = date.fromisoformat(date_naissance)
-                date_choisie = date.fromisoformat(date_rendez_vous)
-            except ValueError:
+            naissance = date_iso_valide(date_naissance)
+            date_choisie = date_iso_valide(date_rendez_vous)
+
+            if naissance is None or date_choisie is None:
                 erreur = "Veuillez saisir des dates valides."
 
             if erreur is None:
@@ -325,7 +336,9 @@ def reservation(medecin_id):
 
         if erreur is None:
             try:
-                connexion.execute("BEGIN")
+                # Verrou d'écriture immédiat : les demandes simultanées
+                # sont traitées l'une après l'autre.
+                connexion.execute("BEGIN IMMEDIATE")
 
                 patient = connexion.execute(
                     """
