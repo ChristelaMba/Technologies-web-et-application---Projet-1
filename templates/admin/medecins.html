@@ -1,0 +1,129 @@
+```html
+{% extends "base.html" %}
+
+{% block title %}Gestion des médecins | Administration{% endblock %}
+
+{% block content %}
+<section class="admin-dashboard">
+    <a class="admin-back" href="{{ url_for('tableau_de_bord') }}">
+        Retour au tableau de bord
+    </a>
+
+    <div class="admin-page-heading">
+        <p class="admin-eyebrow">ESPACE PROFESSIONNEL</p>
+        <h1>Gestion des médecins</h1>
+        <p>Consultez les médecins enregistrés et ajoutez de nouveaux praticiens.</p>
+    </div>
+
+    {% if erreur %}
+        <div class="admin-error" role="alert">{{ erreur }}</div>
+    {% endif %}
+
+    {% if confirmation %}
+        <div class="admin-success" role="status">{{ confirmation }}</div>
+    {% endif %}
+
+    <div class="admin-welcome-card admin-doctor-form-card">
+        <h2>Ajouter un médecin</h2>
+
+        <form method="POST" action="{{ url_for('gestion_medecins') }}">
+            <div class="admin-field">
+                <label for="nom">Nom du médecin *</label>
+                <input
+                    type="text"
+                    id="nom"
+                    name="nom"
+                    maxlength="100"
+                    required
+                >
+            </div>
+
+            <div class="admin-field">
+                <label for="specialite">Spécialité *</label>
+                <input
+                    type="text"
+                    id="specialite"
+                    name="specialite"
+                    maxlength="100"
+                    placeholder="Ex. : Médecine générale"
+                    required
+                >
+            </div>
+
+            <div class="admin-field">
+                <label for="jours_consultation">Jours de consultation *</label>
+                <input
+                    type="text"
+                    id="jours_consultation"
+                    name="jours_consultation"
+                    maxlength="150"
+                    placeholder="Ex. : Lundi, Mercredi, Vendredi"
+                    required
+                >
+                <span class="admin-cell-secondary">
+                    Séparez les jours par des virgules.
+                </span>
+            </div>
+
+            <div class="admin-field">
+                <label for="photo">Chemin ou URL de la photo</label>
+                <input
+                    type="text"
+                    id="photo"
+                    name="photo"
+                    maxlength="255"
+                    placeholder="Ex. : /static/images/medecin.jpg"
+                >
+            </div>
+
+            <button class="admin-submit" type="submit">
+                Ajouter le médecin
+            </button>
+        </form>
+    </div>
+
+    <div class="admin-list-heading">
+        <div>
+            <h2>Médecins enregistrés</h2>
+            <p>{{ medecins|length }} médecin(s)</p>
+        </div>
+    </div>
+
+    {% if medecins %}
+        <div class="admin-doctor-list">
+            {% for medecin in medecins %}
+                <article class="admin-doctor-card">
+                    <div>
+                        <h3>Dr {{ medecin.nom }}</h3>
+                        <p class="admin-doctor-specialty">
+                            {{ medecin.specialite }}
+                        </p>
+                        <p class="admin-doctor-days">
+                            Consultations : {{ medecin.jours_consultation }}
+                        </p>
+                    </div>
+                    <div class="admin-doctor-actions">
+                        <span class="admin-doctor-id">
+                            Référence #{{ medecin.id }}
+                        </span>
+
+                        <a
+                            class="admin-action-button admin-doctor-edit"
+                            href="{{ url_for('modifier_medecin', medecin_id=medecin.id) }}"
+                        >
+                            Modifier
+                        </a>
+                    </div>
+                    
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="admin-empty-state">
+            <h2>Aucun médecin enregistré</h2>
+            <p>Utilisez le formulaire ci-dessus pour ajouter le premier médecin.</p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}
+```

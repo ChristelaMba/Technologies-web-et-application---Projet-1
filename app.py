@@ -534,6 +534,230 @@ def mes_rendez_vous():
     )
 
 
+
+@app.route("/admin/rendez-vous", methods=["GET", "POST"])
+@administrateur_requis
+def gestion_rendez_vous():
+    connexion = get_db()
+    erreur = None
+    confirmation = None
+
+    date_selectionnee = request.values.get(
+        "date",
+        date.today().isoformat(),
+    )
+    medecin_selectionne = request.values.get("medecin_id", "")
+
+    try:
+        date.fromisoformat(date_selectionnee)
+    except ValueError:
+        date_selectionnee = date.today().isoformat()
+        erreur = "La date sélectionnée est invalide."
+
+    if request.method == "POST":
+        rendez_vous_id = request.form.get("rendez_vous_id", type=int)
+        nouveau_statut = request.form.get("statut", "")
+
+        if nouveau_statut not in ("effectué", "annulé"):
+            erreur = "Le statut demandé n'est pas valide."
+
+        elif rendez_vous_id is None:
+            erreur = "Le rendez-vous sélectionné est invalide."
+
+        else:
+            curseur = connexion.execute(
+                """
+                UPDATE rendez_vous
+                SET statut = ?
+                WHERE id = ?
+                  AND statut = 'prévu'
+                """,
+                (nouveau_statut, rendez_vous_id),
+            )
+            connexion.commit()
+
+            if curseur.rowcount == 0:
+                erreur = (
+                    "Ce rendez-vous n'existe pas ou son statut "
+                    "a déjà été modifié."
+                )
+            else:
+                confirmation = (
+                    "Le rendez-vous a été marqué comme "
+                    f"{nouveau_statut}."
+                )
+
+    medecins = connexion.execute(
+        """
+        SELECT id, nom, specialite
+        FROM medecins
+        ORDER BY nom
+        """
+    ).fetchall()
+
+    requete = """
+        SELECT
+            rv.id,
+            rv.date,
+            rv.heure,
+            rv.motif,
+            rv.statut,
+            p.nom AS nom_patient,
+            p.prenom AS prenom_patient,
+            p.telephone,
+            m.nom AS nom_medecin,
+            m.specialite
+        FROM rendez_vous AS rv
+        JOIN patients AS p ON p.id = rv.patient_id
+        JOIN medecins AS m ON m.id = rv.medecin_id
+        WHERE rv.date = ?
+    """
+    parametres = [date_selectionnee]
+
+    if medecin_selectionne:
+        try:
+            identifiant_medecin = int(medecin_selectionne)
+        except ValueError:
+            identifiant_medecin = None
+
+        if identifiant_medecin is None:
+            erreur = "Le médecin sélectionné est invalide."
+            medecin_selectionne = ""
+        else:
+            requete += " AND rv.medecin_id = ?"
+            parametres.append(identifiant_medecin)
+
+    requete += " ORDER BY rv.heure, p.nom"
+
+    rendez_vous = connexion.execute(
+        requete,
+        parametres,
+    ).fetchall()
+
+    return render_template(
+        "admin/rendez_vous.html",
+        rendez_vous=rendez_vous,
+        medecins=medecins,
+        date_selectionnee=date_selectionnee,
+        medecin_selectionne=medecin_selectionne,
+        erreur=erreur,
+        confirmation=confirmation,
+    )
+
+
+
+@app.route("/admin/medecins", methods=["GET", "POST"])
+@administrateur_requis
+def gestion_medecins():
+    connexion = get_db()
+    erreur = None
+    confirmation = None
+
+    if request.method == "POST":
+        nom = request.form.get("nom", "").strip()
+        specialite = request.form.get("specialite", "").strip()
+        jours_consultation = request.form.get(
+            "jours_consultation", ""
+        ).strip()
+        photo = request.form.get("photo", "").strip()
+
+        if not nom or not specialite or not jours_consultation:
+            erreur = "Veuillez remplir tous les champs obligatoires."
+        else:
+            connexion.execute(
+                """
+                INSERT INTO medecins (
+                    nom, specialite, photo, jours_consultation
+                )
+                VALUES (?, ?, ?, ?)
+                """,
+                (
+                    nom,
+                    specialite,
+                    photo or None,
+                    jours_consultation,
+                ),
+            )
+            connexion.commit()
+            confirmation = "Le médecin a été ajouté avec succès."
+
+    medecins = connexion.execute(
+        """
+        SELECT id, nom, specialite, photo, jours_consultation
+        FROM medecins
+        ORDER BY nom
+        """
+    ).fetchall()
+
+    return render_template(
+        "admin/medecins.html",
+        medecins=medecins,
+        erreur=erreur,
+        confirmation=confirmation,
+    )
+
+
+
+@app.route("/admin/medecins/<int:medecin_id>/modifier", methods=["GET", "POST"])
+@administrateur_requis
+def modifier_medecin(medecin_id):
+    connexion = get_db()
+
+    medecin = connexion.execute(
+        """
+        SELECT id, nom, specialite, photo, jours_consultation
+        FROM medecins
+        WHERE id = ?
+        """,
+        (medecin_id,),
+    ).fetchone()
+
+    if medecin is None:
+        abort(404)
+
+    erreur = None
+    confirmation = None
+
+    if request.method == "POST":
+        nom = request.form.get("nom", "").strip()
+        specialite = request.form.get("specialite", "").strip()
+        jours_consultation = request.form.get(
+            "jours_consultation", ""
+        ).strip()
+        photo = request.form.get("photo", "").strip()
+
+        if not nom or not specialite or not jours_consultation:
+            erreur = "Veuillez remplir tous les champs obligatoires."
+        else:
+            connexion.execute(
+                """
+                UPDATE medecins
+                SET nom = ?,
+                    specialite = ?,
+                    photo = ?,
+                    jours_consultation = ?
+                WHERE id = ?
+                """,
+                (
+                    nom,
+                    specialite,
+                    photo or None,
+                    jours_consultation,
+                    medecin_id,
+                ),
+            )
+            connexion.commit()
+
+            return redirect(url_for("gestion_medecins"))
+
+    return render_template(
+        "admin/modifier_medecin.html",
+        medecin=medecin,
+        erreur=erreur,
+    )
+
+
+
 @app.route("/test-db")
 def tester_base():
     connexion = get_db()
@@ -560,6 +784,44 @@ def fermer_connexion(exception=None):
 
     if connexion is not None:
         connexion.close()
+
+
+
+
+
+@app.route("/admin/patients")
+@administrateur_requis
+def liste_patients():
+    connexion = get_db()
+    recherche = request.args.get("q", "").strip()
+
+    if recherche:
+        terme = f"%{recherche}%"
+        patients = connexion.execute(
+            """
+            SELECT id, nom, prenom, telephone, date_naissance, ville
+            FROM patients
+            WHERE nom LIKE ?
+               OR prenom LIKE ?
+               OR telephone LIKE ?
+            ORDER BY nom, prenom
+            """,
+            (terme, terme, terme),
+        ).fetchall()
+    else:
+        patients = connexion.execute(
+            """
+            SELECT id, nom, prenom, telephone, date_naissance, ville
+            FROM patients
+            ORDER BY nom, prenom
+            """
+        ).fetchall()
+
+    return render_template(
+        "admin/patients.html",
+        patients=patients,
+        recherche=recherche,
+    )
 
 
 if __name__ == "__main__":

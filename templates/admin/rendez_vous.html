@@ -1,0 +1,137 @@
+
+{% extends "base.html" %}
+
+{% block title %}Planning des rendez-vous | Administration{% endblock %}
+
+{% block content %}
+<section class="admin-dashboard">
+    <a class="admin-back" href="{{ url_for('tableau_de_bord') }}">
+        ← Retour au tableau de bord
+    </a>
+
+    <div class="admin-page-heading">
+        <p class="admin-eyebrow">ESPACE PROFESSIONNEL</p>
+        <h1>Planning des rendez-vous</h1>
+        <p>Consultez les rendez-vous de la clinique et mettez leur statut à jour.</p>
+    </div>
+
+    {% if erreur %}
+        <div class="admin-error" role="alert">{{ erreur }}</div>
+    {% endif %}
+
+    {% if confirmation %}
+        <div class="admin-success" role="status">{{ confirmation }}</div>
+    {% endif %}
+
+    <form method="GET" action="{{ url_for('gestion_rendez_vous') }}"
+          class="admin-filter-form">
+        <div class="admin-field">
+            <label for="date">Date du planning</label>
+            <input
+                type="date"
+                id="date"
+                name="date"
+                value="{{ date_selectionnee }}"
+                required
+            >
+        </div>
+
+        <div class="admin-field">
+            <label for="medecin_id">Médecin</label>
+            <select id="medecin_id" name="medecin_id">
+                <option value="">Tous les médecins</option>
+                {% for medecin in medecins %}
+                    <option
+                        value="{{ medecin.id }}"
+                        {% if medecin_selectionne|string == medecin.id|string %}selected{% endif %}
+                    >
+                        Dr {{ medecin.nom }} — {{ medecin.specialite }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button class="admin-submit admin-filter-button" type="submit">
+            Afficher le planning
+        </button>
+    </form>
+
+    <div class="admin-list-heading">
+        <div>
+            <h2>Rendez-vous du {{ date_selectionnee }}</h2>
+            <p>{{ rendez_vous|length }} rendez-vous trouvé(s)</p>
+        </div>
+    </div>
+
+    {% if rendez_vous %}
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Heure</th>
+                        <th>Patient</th>
+                        <th>Médecin</th>
+                        <th>Motif</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rv in rendez_vous %}
+                        <tr>
+                            <td class="admin-time">{{ rv.heure }}</td>
+                            <td>
+                                <strong>{{ rv.prenom_patient }} {{ rv.nom_patient }}</strong>
+                                <span class="admin-cell-secondary">{{ rv.telephone }}</span>
+                            </td>
+                            <td>
+                                <strong>Dr {{ rv.nom_medecin }}</strong>
+                                <span class="admin-cell-secondary">{{ rv.specialite }}</span>
+                            </td>
+                            <td>{{ rv.motif }}</td>
+                            <td>
+                                <span class="admin-status admin-status-{{ 'prevu' if rv.statut == 'prévu' else 'effectue' if rv.statut == 'effectué' else 'annule' }}">
+                                    {{ rv.statut }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if rv.statut == 'prévu' %}
+                                    <div class="admin-row-actions">
+                                        <form method="POST" action="{{ url_for('gestion_rendez_vous') }}">
+                                            <input type="hidden" name="rendez_vous_id" value="{{ rv.id }}">
+                                            <input type="hidden" name="statut" value="effectué">
+                                            <input type="hidden" name="date" value="{{ date_selectionnee }}">
+                                            <input type="hidden" name="medecin_id" value="{{ medecin_selectionne }}">
+                                            <button class="admin-action-button admin-action-done" type="submit">
+                                                Effectué
+                                            </button>
+                                        </form>
+
+                                        <form method="POST" action="{{ url_for('gestion_rendez_vous') }}"
+                                              onsubmit="return confirm('Confirmer l’annulation de ce rendez-vous ?');">
+                                            <input type="hidden" name="rendez_vous_id" value="{{ rv.id }}">
+                                            <input type="hidden" name="statut" value="annulé">
+                                            <input type="hidden" name="date" value="{{ date_selectionnee }}">
+                                            <input type="hidden" name="medecin_id" value="{{ medecin_selectionne }}">
+                                            <button class="admin-action-button admin-action-cancel" type="submit">
+                                                Annuler
+                                            </button>
+                                        </form>
+                                    </div>
+                                {% else %}
+                                    <span class="admin-cell-secondary">Aucune action</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="admin-empty-state">
+            <h2>Aucun rendez-vous pour cette sélection</h2>
+            <p>Essayez une autre date ou choisissez tous les médecins.</p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

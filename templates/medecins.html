@@ -1,4 +1,4 @@
-
+```html
 {% extends "base.html" %}
 
 {% block title %}Nos médecins | Clinique Santé{% endblock %}
@@ -12,7 +12,9 @@
                     <span class="status-dot"></span>
                     PRENDRE SOIN DE VOUS
                 </p>
+
                 <h1>Rencontrez nos médecins</h1>
+
                 <p class="doctors-intro">
                     Trouvez le spécialiste adapté à vos besoins et
                     choisissez votre prochain créneau de consultation.
@@ -33,18 +35,25 @@
                         <path d="m16 16 5 5"/>
                     </svg>
                 </span>
+
                 <div>
                     <strong>Notre équipe médicale</strong>
-                    <p>Choisissez une spécialité pour affiner votre recherche.</p>
+                    <p>
+                        Choisissez une spécialité pour affiner votre recherche.
+                    </p>
                 </div>
             </div>
 
             <div class="doctors-filter">
                 <label for="filtre-specialite">Spécialité médicale</label>
+
                 <select id="filtre-specialite">
                     <option value="toutes">Toutes les spécialités</option>
+
                     {% for specialite in medecins|map(attribute='specialite')|unique|sort %}
-                        <option value="{{ specialite }}">{{ specialite }}</option>
+                        <option value="{{ specialite }}">
+                            {{ specialite }}
+                        </option>
                     {% endfor %}
                 </select>
             </div>
@@ -57,21 +66,40 @@
             <span>{{ medecins|length }} profils</span>
         </div>
 
-        <div class="doctors-grid doctors-grid-redesigned" id="liste-medecins">
+        <div
+            class="doctors-grid doctors-grid-redesigned"
+            id="liste-medecins"
+        >
             {% for medecin in medecins %}
+                {% set chemin_photo = medecin['photo'] %}
+
+                {% if not chemin_photo and medecin['id'] <= 8 %}
+                    {% set chemin_photo = url_for(
+                        'static',
+                        filename='images/medecins/medecin-' ~ medecin['id'] ~ '.jpg'
+                    ) %}
+                {% endif %}
+
                 <article
                     class="doctor-card doctor-card-redesigned"
                     data-specialite="{{ medecin['specialite'] }}"
                 >
                     <div class="doctor-photo-wrap">
-                        <img
-                            class="doctor-photo"
-                            src="{{ url_for('static', filename='images/medecins/medecin-' ~ loop.index ~ '.jpg') }}"
-                            alt="Portrait du médecin {{ medecin['nom'] }}"
-                            loading="lazy"
-                            onerror="this.hidden=true; this.nextElementSibling.hidden=false;"
+                        {% if chemin_photo %}
+                            <img
+                                class="doctor-photo"
+                                src="{{ chemin_photo }}"
+                                alt="Portrait du médecin {{ medecin['nom'] }}"
+                                loading="lazy"
+                                onerror="this.hidden=true; this.nextElementSibling.hidden=false;"
+                            >
+                        {% endif %}
+
+                        <div
+                            class="doctor-photo-fallback"
+                            {% if chemin_photo %}hidden{% endif %}
+                            aria-hidden="true"
                         >
-                        <div class="doctor-photo-fallback" hidden aria-hidden="true">
                             {{ medecin['nom'].replace('Dr ', '')[0] }}
                         </div>
 
@@ -91,17 +119,25 @@
                         <div class="doctor-days doctor-days-redesigned">
                             <span class="doctor-detail-label">
                                 <svg viewBox="0 0 24 24" aria-hidden="true">
-                                    <rect x="3" y="5" width="18" height="16" rx="2"/>
+                                    <rect
+                                        x="3"
+                                        y="5"
+                                        width="18"
+                                        height="16"
+                                        rx="2"
+                                    />
                                     <path d="M16 3v4M8 3v4M3 10h18"/>
                                 </svg>
                                 Jours de consultation
                             </span>
+
                             <p>{{ medecin['jours_consultation'] }}</p>
                         </div>
                     </div>
 
                     <div class="doctor-card-footer doctor-card-footer-redesigned">
                         <span>Sur rendez-vous</span>
+
                         <a
                             class="doctor-link doctor-link-redesigned"
                             href="{{ url_for('detail_medecin', medecin_id=medecin['id']) }}"
@@ -129,3 +165,4 @@
     {% endif %}
 </section>
 {% endblock %}
+```

@@ -1,0 +1,96 @@
+ {% extends "base.html" %}
+
+{% block title %}Gestion des patients | Clinique Santé{% endblock %}
+
+{% block content %}
+<section class="admin-patients-page">
+    <div class="admin-patients-header">
+        <div>
+            <p class="admin-patients-eyebrow">ESPACE ADMINISTRATEUR</p>
+            <h1>Gestion des patients</h1>
+            <p class="admin-patients-description">
+                Consultez les patients enregistrés et retrouvez leurs informations.
+            </p>
+        </div>
+
+        <a class="admin-patients-back" href="{{ url_for('tableau_de_bord') }}">
+            Retour au tableau de bord
+        </a>
+    </div>
+
+    <div class="admin-patients-panel">
+        <form method="GET" action="{{ url_for('liste_patients') }}"
+              class="admin-patients-search">
+            <div class="admin-patients-search-field">
+                <label for="recherche-patient">Rechercher un patient</label>
+                <input
+                    type="search"
+                    id="recherche-patient"
+                    name="q"
+                    value="{{ recherche }}"
+                    placeholder="Nom, prénom ou téléphone"
+                >
+            </div>
+
+            <button type="submit" class="admin-patients-button">
+                Rechercher
+            </button>
+
+            {% if recherche %}
+                <a class="admin-patients-reset"
+                   href="{{ url_for('liste_patients') }}">
+                    Effacer
+                </a>
+            {% endif %}
+        </form>
+
+        <div class="admin-patients-summary">
+            <h2>Patients enregistrés</h2>
+            <span>{{ patients|length }} résultat(s)</span>
+        </div>
+
+        {% if patients %}
+            <div class="admin-patients-table-wrap">
+                <table class="admin-patients-table">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Prénom</th>
+                            <th>Téléphone</th>
+                            <th>Date de naissance</th>
+                            <th>Ville</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for patient in patients %}
+                            <tr>
+                                <td>{{ patient["nom"] }}</td>
+                                <td>{{ patient["prenom"] }}</td>
+                                <td>{{ patient["telephone"] }}</td>
+                                <td>{{ patient["date_naissance"] }}</td>
+                                <td>{{ patient["ville"] }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="admin-patients-empty">
+                <h3>Aucun patient trouvé</h3>
+                {% if recherche %}
+                    <p>
+                        Aucun patient ne correspond à « {{ recherche }} ».
+                        Vérifiez le texte saisi ou essayez une autre recherche.
+                    </p>
+                    <a href="{{ url_for('liste_patients') }}">
+                        Afficher tous les patients
+                    </a>
+                {% else %}
+                    <p>Aucun patient n'est actuellement enregistré dans la base de données.</p>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,83 @@
+```html
+{% extends "base.html" %}
+
+{% block title %}Modifier un médecin | Administration{% endblock %}
+
+{% block content %}
+<section class="admin-dashboard">
+    <a class="admin-back" href="{{ url_for('gestion_medecins') }}">
+        Retour à la liste des médecins
+    </a>
+
+    <div class="admin-page-heading">
+        <p class="admin-eyebrow">ESPACE PROFESSIONNEL</p>
+        <h1>Modifier un médecin</h1>
+        <p>Modifiez les informations du praticien sélectionné.</p>
+    </div>
+
+    {% if erreur %}
+        <div class="admin-error" role="alert">{{ erreur }}</div>
+    {% endif %}
+
+    <div class="admin-welcome-card admin-doctor-form-card">
+        <h2>Dr {{ medecin.nom }}</h2>
+
+        <form method="POST" action="{{ url_for('modifier_medecin', medecin_id=medecin.id) }}">
+            <div class="admin-field">
+                <label for="nom">Nom du médecin *</label>
+                <input
+                    type="text"
+                    id="nom"
+                    name="nom"
+                    maxlength="100"
+                    value="{{ request.form.get('nom', medecin.nom) }}"
+                    required
+                >
+            </div>
+
+            <div class="admin-field">
+                <label for="specialite">Spécialité *</label>
+                <input
+                    type="text"
+                    id="specialite"
+                    name="specialite"
+                    maxlength="100"
+                    value="{{ request.form.get('specialite', medecin.specialite) }}"
+                    required
+                >
+            </div>
+
+            <div class="admin-field">
+                <label for="jours_consultation">Jours de consultation *</label>
+                <input
+                    type="text"
+                    id="jours_consultation"
+                    name="jours_consultation"
+                    maxlength="150"
+                    value="{{ request.form.get('jours_consultation', medecin.jours_consultation) }}"
+                    required
+                >
+                <span class="admin-cell-secondary">
+                    Séparez les jours par des virgules.
+                </span>
+            </div>
+
+            <div class="admin-field">
+                <label for="photo">Chemin ou URL de la photo</label>
+                <input
+                    type="text"
+                    id="photo"
+                    name="photo"
+                    maxlength="255"
+                    value="{{ request.form.get('photo', medecin.photo or '') }}"
+                >
+            </div>
+
+            <button class="admin-submit" type="submit">
+                Enregistrer les modifications
+            </button>
+        </form>
+    </div>
+</section>
+{% endblock %}
+```

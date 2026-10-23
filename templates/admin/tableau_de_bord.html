@@ -25,10 +25,24 @@
     <div class="admin-welcome-card">
         <h2>Gestion de la clinique</h2>
         <p>
-            L'accès administrateur fonctionne.
-            Les fonctions de gestion des rendez-vous, des médecins
-            et des patients seront ajoutées dans les prochaines étapes.
+            Choisissez une fonctionnalité pour gérer les activités de la clinique.
         </p>
+        
+        <div class="admin-dashboard-actions">
+            <a class="admin-submit admin-dashboard-link" href="{{ url_for('gestion_rendez_vous') }}">
+                Gérer les rendez-vous
+            </a>
+
+            <a class="admin-submit admin-dashboard-link" href="{{ url_for('gestion_medecins') }}">
+                Gérer les médecins
+            </a>
+
+            <a class="admin-submit admin-dashboard-link"
+                href="{{ url_for('liste_patients') }}">
+                 Gestion des patients
+            </a>
+
+        </div>
     </div>
 </section>
 {% endblock %}
